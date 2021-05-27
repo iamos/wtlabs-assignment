@@ -31,13 +31,12 @@ class CompanyTagRoute(Resource):
         tag_ids = request.get_json().get("tag_id", [])
 
         for tid in tag_ids:
-            CompanyTagModel.add_session(
-                session=session, company_id=company_id, tag_id=tid
-            )
+            CompanyTagModel.add_tag(session=session, company_id=company_id, tag_id=tid)
         try:
             session.commit()
         except Exception:
             session.rollback()
+            abort(500)
 
     def delete(self):
         """

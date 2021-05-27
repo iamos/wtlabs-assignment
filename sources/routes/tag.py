@@ -24,17 +24,18 @@ class TagRoute(Resource):
         offset = request.args.get("offset", 0)
         limit = request.args.get("limit", 50)
 
-        qr = session.query(CompanyModel).filter(
-            CompanyModel.id == CompanyTagModel.company_id,
-            TagModel.id == CompanyTagModel.tag_id,
-            TagModel.locale_tag.contains({locale: q})
-        ).offset(offset).limit(limit)
+        qr = (
+            session.query(CompanyModel)
+            .filter(
+                CompanyModel.id == CompanyTagModel.company_id,
+                TagModel.id == CompanyTagModel.tag_id,
+                TagModel.locale_tag.contains({locale: q}),
+            )
+            .offset(offset)
+            .limit(limit)
+        )
 
-        response_body = {
-            "q" : q,
-            "locale" : locale,
-            "result": []
-        }
+        response_body = {"q": q, "locale": locale, "result": []}
         for _ in qr:
             response_body["result"].append(_.response_body(locale=locale))
         return response_body
