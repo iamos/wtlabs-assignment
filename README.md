@@ -14,6 +14,10 @@ docker-compose version 1.29.1, build c34c88b2
 
 ## 실행 방법
 
+0. **요약**
+
+    `docker-compose build && docker-compose up`
+
 1. Docker 이미지 빌드
 
     `docker-compose.yaml`이 있는 디렉토리에서 `$docker-compose build`를 수행해주세요.
