@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  postgres:
+    image: "postgres:13.3-alpine"
+    environment: 
+      - POSTGRES_USER=iamos
+      - POSTGRES_PASSWORD=iamos123
+      - POSTGRES_DB=wantedlabs
+  api:
+    build:
+      context: .
+      dockerfile: dockerfiles/api.Dockerfile
+    image: "wantedlab_backend/api:latest"
+    ports:
+      - "5000:5000"
+    depends_on: 
+      - "postgres"
