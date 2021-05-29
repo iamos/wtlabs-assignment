@@ -61,24 +61,48 @@ docker-compose version 1.29.1, build c34c88b2
 ## Database 설계
 
 1. Company Table
+
+    실제로 회사명 검색을 위한 인덱싱은 별도의 데이터(ElasticSearch 등)로 관리하는게 맞지만, 프로젝트의 간소성을 위해 Text Field로 구현했습니다.
+
+    `StringColumn.contains()` 를 사용해 회사명 자동검색 API를 구현했습니다.
     | | id (INT)| name (TEXT)| locale_name (JSONB)|
     |-|-|-|-|
     | 설명 | Primary key | 검색을 위한 string | 다국어 지원을 위한 필드|
     | 예시 | 1 | "원티드랩, Wantedlab" | {"en": "Wantedlab","ko": "원티드랩"} |
 
 2. Tag Table
+
+    태그가 의미하는 바는 갖지만 그것을 표현하는 언어가 다른 데이터셋을 표현하기 위해 `JSONB type`을 사용했습니다.
     | | id (INT)| locale_tag (JSONB)|
     |-|-|-|
     | 설명 | Primary Key | 다국어 지원을 위한 필드 |
     | 예시 | 1 | { "en": "tag_1", "jp": "タグ_1", "ko": "태그_1"} |
 
 3. CompanyTag Table
+
+    Company-Tag M:N relation을 표현하기 위한 Table입니다.
     | | id (INT) | company_id (INT) | tag_id (INT) |
     |-|-|-|-|
     | 설명 | Primary Key | Foreign key | Foreign key |
     | 예시 | 156 | 64 | 28 |
 
 ## API 문서
+
+API는 쿼리스트링에 `locale`(언어)을 받습니다.
+
+`locale`과 일치하는 데이터가 없다면 한국어, 영어, 일본어중 데이터가 있는  값을 먼저 보여줍니다.
+
+```json
+# [GET] tag?q=tag_4&locale=en
+{
+    "company.id": 65,
+    "company.name": "KFC Korea",
+    "company.locale_name": {
+        "ko": "KFC Korea"
+    }
+}
+```
+위 예시는 `locale=en`을 요청했지만 결과인 `"KFC KOREA"`는 `locale_name.en`대신 `locale_name.ko`를 결과로 내보냅니다.
 
 ### 회사명 자동완성
 
@@ -113,7 +137,7 @@ HTTP_200,
 
 `GET http://localhost:5000/tag?q=<tag>&locale=<locale>`
 
-locale과 일치하는 회사 이름을 최우선으로 보여줍니다. 그렇지 않으면 ko, en, jp 순으로 이름을 표시합니다.
+`locale`과 일치하는 회사 이름을 최우선으로 보여줍니다. 그렇지 않으면 `ko`, `en`, `jp` 순으로 이름을 표시합니다.
 
 ```bash
 Request
